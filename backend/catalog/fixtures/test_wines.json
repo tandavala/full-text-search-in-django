@@ -34,5 +34,17 @@
         "variety": "Chardonnay",
         "winery": "Au Pied du Mont Chauve"
       }
+    },
+    {
+      "model": "catalog.Wine",
+      "fields": {
+        "country": "France",
+        "description": "A creamy wine with full Chardonnay flavors.",
+        "id": "000bbdff-30fc-4897-81c1-7947e11e6d1a",
+        "points": 89,
+        "price": 33.00,
+        "variety": "Champagne Blend",
+        "winery": "Phillipe Gonet"
+      }
     }
   ]
