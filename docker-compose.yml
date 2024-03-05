@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: perusable-backend
+    command: ["bash", "start.sh"]
+    ports:
+      - 8003:8000
+    volumes:
+      - ./backend:/usr/src/app
+    environment:
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DATABASE=perusable
+      - SQL_USER=perusable
+      - SQL_PASSWORD=perusable
+      - SQL_HOST=perusable-database
+      - SQL_PORT=5432
+
+  database:
+    container_name: perusable-database
+    environment:
+      - POSTGRES_DB=perusable
+      - POSTGRES_USER=perusable
+      - POSTGRES_PASSWORD=perusable
+    image: postgres:15.2
+    ports:
+      - "5433:5433"
+
+    volumes:
+      - perusable-database:/var/lib/postgresql/data
+
+volumes:
+  perusable-database:
