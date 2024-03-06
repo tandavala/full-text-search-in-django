@@ -15,7 +15,10 @@ class Command(BaseCommand):
                 '_id': wine.id,
                 'variety': wine.variety,
                 'winery': wine.winery,
-                'description': wine.description
+                'description': wine.description,
+                'country': wine.country,
+                'price': wine.price,
+                'points': wine.points
             }
 
     def handle(self, *args, **kwargs):
