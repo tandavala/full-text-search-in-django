@@ -103,7 +103,7 @@ function Search({ search }) {
                 }}
                 onInputChange={(value) => setFieldValue("query", value)}
                 onSearch={wineSearchWord}
-                options={options ?? []}
+                options={options}
                 placeholder="Enter a search term (e.g. cabernet)"
                 type="text"
                 value={values.query}
