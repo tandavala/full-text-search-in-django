@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // changed
+import React, { useState } from "react";
 
 import "./App.css";
 import Paginator from "./components/Paginator";
@@ -9,10 +9,8 @@ import Search from "./components/Search";
 import axios from "axios";
 
 function App() {
-  // new
   const [paginatedData, setPaginatedData] = useState([]);
 
-  // new
   const search = async (params) => {
     try {
       const response = await axios({
@@ -28,7 +26,7 @@ function App() {
 
   return (
     <Container className="pt-3">
-      <h1>Perusable</h1>
+      <h1>Search.com</h1>
       <p className="lead">
         Use the controls below to peruse the wine catalog and filter the
         results.
