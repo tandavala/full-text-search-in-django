@@ -3,3 +3,4 @@ __MACOSX
 __pycache__
 .python-version
 static
+node_modules/
