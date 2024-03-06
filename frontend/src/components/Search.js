@@ -2,8 +2,14 @@ import { Formik } from "formik";
 import { Button, Col, Form, Row } from "react-bootstrap";
 
 function Search({ search }) {
-  const onSubmit = (values, actions) => {
-    search(values.country, values.points, values.query);
+  const onSubmit = async (values, actions) => {
+    await search({
+      country: values.country,
+      limit: 10,
+      offset: 0,
+      points: values.points,
+      query: values.query,
+    });
   };
 
   return (
