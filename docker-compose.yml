@@ -10,6 +10,7 @@ services:
       - 8003:8000
     volumes:
       - ./backend:/usr/src/app
+
     environment:
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=perusable
@@ -17,7 +18,7 @@ services:
       - SQL_PASSWORD=perusable
       - SQL_HOST=perusable-database
       - SQL_PORT=5432
-      - ES_HOSTS=http://perusable-elasticsearch:9200
+      - ES_HOSTS=http://elasticsearch:9200
 
   database:
     container_name: perusable-database
@@ -51,8 +52,6 @@ services:
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
       - bootstrap.memory_lock=true
       - discovery.type=single-node
-      # WARNING: Enable X-Pack security for production builds
-      - xpack.security.enabled=false
     image: elasticsearch:7.17.9
     ports:
       - 9200:9200
@@ -60,8 +59,8 @@ services:
       - perusable-elasticsearch:/usr/share/elasticsearch/data
 
   kibana:
-    container_name: kibana
     image: docker.elastic.co/kibana/kibana:7.17.9
+    container_name: kibana
     ports:
       - 5601:5601
     environment:

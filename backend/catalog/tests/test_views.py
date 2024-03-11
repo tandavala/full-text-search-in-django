@@ -12,6 +12,7 @@ from rest_framework.test import APIClient, APITestCase
 from catalog.constants import ES_MAPPING  # new
 from catalog.models import Wine, WineSearchWord
 from catalog.serializers import WineSerializer
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 
 class ViewTests(APITestCase):
@@ -27,8 +28,7 @@ class ViewTests(APITestCase):
         self.client = APIClient()
 
     # def test_empty_query_returns_everything(self):
-    #     response = self.client.get('/api/v1/catalog/wines/')
-
+    #     response = self.client.get('/api/v1/catalog/pg-wines/')  # changed
     #     wines = Wine.objects.all()
     #     self.assertJSONEqual(
     #         response.content, WineSerializer(wines, many=True).data)
@@ -145,8 +145,9 @@ class ViewTests(APITestCase):
         response = self.client.get('/api/v1/catalog/wine-search-words/', {
             'query': 'greegio'
         })
-        self.assertEqual(4, len(response.data))
-        self.assertEqual('grigio', response.data['results'][0]['word'])
+        self.assertEqual(2, len(response.data))
+
+        self.assertEqual('grigio', response.data[0]['word'])
 
 
 class ESViewTests(APITestCase):
@@ -158,7 +159,7 @@ class ESViewTests(APITestCase):
                 'number_of_shards': 1,
                 'number_of_replicas': 0,
             },
-            'mappings': ES_MAPPING,  # changed
+            'mappings': ES_MAPPING,
         })
 
         # Load fixture data
@@ -168,7 +169,6 @@ class ESViewTests(APITestCase):
             fixture_data = json.loads(fixture_file.read())
             for wine in fixture_data:
                 fields = wine['fields']
-                # changed
                 self.connection.create(index=self.index, id=fields['id'], body={
                     'country': fields['country'],
                     'description': fields['description'],
@@ -178,17 +178,99 @@ class ESViewTests(APITestCase):
                     'winery': fields['winery'],
                 }, refresh=True)
 
+        # Start patching - new
+        self.mock_constants = patch('catalog.views.constants').start()
+        self.mock_constants.ES_INDEX = self.index
+
+    # changed
     def test_query_matches_variety(self):
-        # changed
-        with patch('catalog.views.constants') as mock_constants:
-            mock_constants.ES_INDEX = self.index
-            response = self.client.get('/api/v1/catalog/es-wines/', {
-                'query': 'Cabernet',
-            })
-            results = response.data['results']
+        response = self.client.get('/api/v1/catalog/es-wines/', {
+            'query': 'Cabernet',
+        })
+        results = response.data['results']
         self.assertEquals(1, len(results))
         self.assertEquals(
             "58ba903f-85ff-45c2-9bac-6d0732544841", results[0]['id'])
 
+    # changed
+    def test_no_previous_page_for_first_page_of_results(self):
+        response = self.client.get('/api/v1/catalog/es-wines/', {
+            'limit': 1,
+            'offset': 0,  # first page of results
+            'query': 'wine',
+        })
+        self.assertIsNone(response.data['previous'])
+
+    # changed
+    def test_previous_page(self):
+        response = self.client.get('/api/v1/catalog/es-wines/', {
+            'limit': 1,
+            'offset': 1,
+            'query': 'wine',
+        })
+
+        # Extract `offset` from `previous` URL
+        previous = urlsplit(response.data['previous'])
+        query_params = parse_qs(previous.query)
+        offset = int(query_params['offset'][0])
+
+        self.assertEquals(0, offset)
+
+    # changed
+    def test_no_next_page_for_last_page_of_results(self):
+        response = self.client.get('/api/v1/catalog/es-wines/', {
+            'limit': 1,
+            'offset': 3,  # last page of results
+            'query': 'wine',
+        })
+        self.assertIsNone(response.data['next'])
+
+    # changed
+    def test_next_page(self):
+        response = self.client.get('/api/v1/catalog/es-wines/', {
+            'limit': 1,
+            'offset': 1,
+            'query': 'wine',
+        })
+
+        # Extract `offset` from `next` URL
+        next = urlsplit(response.data['next'])
+        query_params = parse_qs(next.query)
+        offset = int(query_params['offset'][0])
+
+        self.assertEquals(2, offset)
+
+    # changed
+    def test_search_results_returned_in_correct_order(self):
+        response = self.client.get('/api/v1/catalog/es-wines/', {
+            'query': 'Chardonnay',
+        })
+        results = response.data['results']
+        self.assertEquals(2, len(results))
+        self.assertListEqual([
+            "0082f217-3300-405b-abc6-3adcbecffd67",
+            "000bbdff-30fc-4897-81c1-7947e11e6d1a",
+        ], [item['id'] for item in results])
+
+    def test_description_highlights_matched_words(self):
+        response = self.client.get('/api/v1/catalog/es-wines/', {
+            'query': 'wine',
+        })
+        results = response.data['results']
+        self.assertEquals('A delicious bottle of <mark>wine</mark>.',
+                          results[0]['description'])
+
+    def test_suggests_words_for_spelling_mistakes(self):
+        response = self.client.get('/api/v1/catalog/es-wine-search-words/', {
+            'query': 'greegio',
+        })
+        # Suggestions are: "grigio" (freq=1483) and "grego" (freq=1)
+        self.assertEqual(2, len(response.data))
+        self.assertEqual('grigio', response.data[0]['word'])
+        self.assertEqual('grego', response.data[1]['word'])
+
     def tearDown(self):
+        # Stop patching - new
+        self.mock_constants.stop()
+
         self.connection.indices.delete(index=self.index)

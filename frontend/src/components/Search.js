@@ -17,7 +17,7 @@ function Search({ search }) {
       try {
         const response = await axios({
           method: "get",
-          url: "http://localhost:8003/api/v1/catalog/wine-search-words/",
+          url: "http://localhost:8003/api/v1/catalog/pg-wine-search-words/",
           params: {
             query,
           },
@@ -108,8 +108,6 @@ function Search({ search }) {
                 type="text"
                 value={values.query}
               />
-              options.filter is not a function TypeError: options.filter is not
-              a function
               <Form.Text className="text-muted">
                 Searches for query in variety, winery, and description.
               </Form.Text>
