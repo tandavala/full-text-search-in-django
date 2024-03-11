@@ -9,7 +9,7 @@ urlpatterns = [
     path('api/v1/catalog/', include('catalog.urls'))
 ]
 
-if settings.DEBUG or settings.TESTING_MODE:  # changed
+if settings.DEBUG or settings.TESTING_MODE:
     urlpatterns = [
         path('debug/', include(debug_toolbar.urls)),
     ] + urlpatterns

@@ -1,8 +1,7 @@
 import React from "react";
 
-import ResultListItem from "./ResultListItem"; // new
+import ResultListItem from "./ResultListItem";
 
-// changed
 function ResultList({ results }) {
   if (!results) {
     return <p>Search using the left panel.</p>;
