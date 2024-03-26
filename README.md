@@ -17,3 +17,14 @@ Full Text Search (FTS) is crucial for a variety of reasons, particularly in the 
 7. Indexing and Scalability: FTS relies on efficient indexing techniques to organize and retrieve text data quickly. Indexing allows FTS systems to scale effectively, even when dealing with massive volumes of text data distributed across multiple sources or repositories.
 
 8. Cross-Domain Applications: FTS is applicable across various domains, including e-commerce, publishing, healthcare, law enforcement, academia, and more. Its versatility makes it a valuable tool for any organization dealing with text-based data and information retrieval challenges.
+
+
+# The Stack 
+
+To construct this project, I employed the following technology stack:
+
+- Docker & docker-compose: for containerization purposes
+- Django framework: as the foundation for web development
+- Postgres: for implementing Full Text Search (FTS) endpoints using PostgreSQL
+- Elasticsearch: for implementing FTS endpoints using Elasticsearch
+  
